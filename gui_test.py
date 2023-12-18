@@ -17,7 +17,11 @@ def main():
     # Define the layout
     layout = [
         [sg.Input("", key="barcode", enable_events=True)],
-        [sg.Button("OK")]
+        [sg.Button("×"+str(i)) for i in range(2,10)],
+        [sg.Table(justification="right", values=[
+            ["123456789", "פריט 1", "1", "10"],
+            ["987654321", "פריט 2", "2", "20"]
+            ], headings=["ברקוד", "פריט", "כמות", "מחיר"], key="cart")],
     ]
 
     # Create the window
