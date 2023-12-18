@@ -1,7 +1,7 @@
 import PySimpleGUI as sg
 import json
 
-CODES = json.load(open("key.json"))
+CODES = json.load(open("products.json"))
 
 # functions to be replaced with util
 def calc_price(code, count):
