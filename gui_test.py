@@ -18,9 +18,11 @@ while True:
     if event == "barcode":
         if not values["barcode"][-1].isnumeric():
             window["barcode"].update(values["barcode"][:-1])
+
         elif values["barcode"] in codes:
             print(codes[values["barcode"]])
             window["barcode"].update("")
+            
     if event == sg.WINDOW_CLOSED or event == "OK":
         break
 
