@@ -16,7 +16,7 @@ while True:
     event, values = window.read()
     print(event, values)
     if event == "barcode":
-        if not values["barcode"][-1].isnumeric():
+        if len(values["barcode"]) and not values["barcode"][-1].isnumeric():
             window["barcode"].update(values["barcode"][:-1])
 
         elif values["barcode"] in codes:
