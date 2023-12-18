@@ -1,31 +1,11 @@
 import json
 import time
+import util
 
 KEY_FILE = r'C:\Users\morih\OneDrive\מסמכים\הראל\תכנות\python\stam_dvarim_py\kiyosk\key.json'
 BUYED_PRODUCTS = r'C:\Users\morih\OneDrive\מסמכים\הראל\תכנות\python\stam_dvarim_py\kiyosk\buyed.txt'
 COUNT_FILE = r'C:\Users\morih\OneDrive\מסמכים\הראל\תכנות\python\stam_dvarim_py\kiyosk\count.txt'
 
-def load_products():
-    while True:
-        barcode = input("\nscan product barcode: ")
-        price = input("enter product price: ")
-        name = input("enter product name: ")
-
-
-        with open(KEY_FILE, 'r') as f:
-            data = json.load(f)
-
-        data1 = {barcode : [price, name]}
-        data.update(data1)
-        
-        with open(KEY_FILE, 'w') as f:
-            json.dump(data, f)
-
-
-        #check if user wants to continue
-        inp = input("press enter to continue or q to quit: ")
-        if inp == 'q':
-            break
 
 count_money = 0 #כמות הכסף שאמורה להיות בקופה מאז שהופעלה התוכנה.סכום של כל הקניות שבוצעו
 
@@ -77,7 +57,7 @@ def main():
         print("manager mode")
         manager_input = input("1. load products, 2. print the money count up to this day \nenter your choice:")
         if manager_input == '1':
-            load_products()
+            util.load_products()
 
         elif manager_input == '2':
             with open(COUNT_FILE, 'r') as files:
