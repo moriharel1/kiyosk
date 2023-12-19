@@ -6,39 +6,6 @@ PRODUCTS_F = 'products.json'
 PURCHASE_LOG_F = 'purchase_log.csv'
 COUNT_F = 'count.csv'
 
-with open(DEALS_F, 'r') as f:
-    DEALS_DATA = json.load(f)
-
-COUNT = 0 # count the value of every purchase (the sum of all the purchases)
-time_operated = time.strftime("%d/%m/%Y/%H:%M:%S") # the time the program operated
-
-def load_products():
-    """
-    load the products to the file from the user input and save it to the file 
-    this is manager option
-
-    :input: barcode, price, name
-    """
-    while True:
-        #check if user wants to continue
-        inp = input("press enter to continue or q to quit: ")
-        if inp == 'q':
-            break
-
-
-        barcode = input("\nscan product barcode: ")
-        price = input("enter product price: ")
-        name = input("enter product name: ")
-
-        with open(PRODUCTS_F, 'r') as f:
-            data = json.load(f)
-
-        data1 = {barcode : [price, name]}
-        data.update(data1)
-        
-        with open(PRODUCTS_F, 'w') as f:
-            json.dump(data, f)
-
 def read_file(file_name):
     """
     read the file and return the data without the first line (the titles in the csv file)
@@ -67,7 +34,45 @@ def write_file(filename, data : list = []):
             f.write(str(i) + ', ')
         f.write('\n')
 
-def price_calculator(name, amount):
+with open(PRODUCTS_F, 'r') as f:
+    PRODUCTS_DATA = json.load(f)
+
+with open(DEALS_F, 'r') as f:
+    DEALS_DATA = json.load(f)
+
+PURCHASE_LOG_DATA = read_file(PURCHASE_LOG_F)
+COUNT_DATA = read_file(COUNT_F)
+
+COUNT = 0 # count the value of every purchase (the sum of all the purchases)
+time_operated = time.strftime("%d/%m/%Y/%H:%M:%S") # the time the program operated
+
+def load_products():
+    """
+    load the products to the file from the user input and save it to the file 
+    this is manager option
+
+    :input: barcode, price, name
+    """
+    while True:
+        #check if user wants to continue
+        inp = input("press enter to continue or q to quit: ")
+        if inp == 'q':
+            break
+
+        barcode = input("\nscan product barcode: ")
+        price = input("enter product price: ")
+        name = input("enter product name: ")
+
+        with open(PRODUCTS_F, 'r') as f:
+            data = json.load(f)
+
+        data1 = {barcode : [price, name]}
+        data.update(data1)
+        
+        with open(PRODUCTS_F, 'w') as f:
+            json.dump(data, f)
+
+def price_calculator(barcode, amount):
     """
     calculate the price of the product
 
@@ -76,8 +81,27 @@ def price_calculator(name, amount):
     :return: the price of the products
     """
 
+    product_name = PRODUCTS_DATA[barcode][1]
 
-    #return price
+    #check if the product is in the deals file
+    if product_name in DEALS_DATA:
+        for i in DEALS_DATA[product_name]:
+
+            #check if the amount is enough for the deal
+            if amount >= DEALS_DATA[product_name][i][0]:
+                #calculate the price
+                price = (amount // DEALS_DATA[product_name][0]) * DEALS_DATA[product_name][1] + (amount % DEALS_DATA[product_name][0]) * PRODUCTS_DATA[barcode][0]
+                return price
+            
+            else: #if the amount that buyed is not enough for the deal
+                #calculate the price
+                price = amount * PRODUCTS_DATA[barcode][0]
+                return price
+            
+    else: #if the product is not in the deals file calculate the 
+        #calculate the price
+        price = amount * PRODUCTS_DATA[barcode][0]
+        return price
 
 def buy(barcode, amount = 1):
     """
@@ -115,12 +139,12 @@ def main():
     #functions check
     #data = read_file(COUNT_F)                         
     #write_file(COUNT_F, [time, time, count])             
-    #load_products()                                   
+    load_products()                                   
     #buy("1")      
 
     #every time do this when the program is done
-    time_end_operate = time.strftime("%d/%m/%Y/%H:%M:%S")
-    write_file(COUNT_F, [time_operated, time_end_operate , COUNT])                
+    #time_end_operate = time.strftime("%d/%m/%Y/%H:%M:%S")
+    #write_file(COUNT_F, [time_operated, time_end_operate , COUNT])                
     
 
 if __name__ == '__main__':
