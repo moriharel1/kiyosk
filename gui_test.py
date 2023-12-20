@@ -1,4 +1,4 @@
-import PySimpleGUIWx as sg
+import PySimpleGUI as sg
 import json
 
 CODES = json.load(open("data/products.json"))
