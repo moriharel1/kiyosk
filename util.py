@@ -1,10 +1,12 @@
 import json
 import time
 
-DEALS_F = 'deals.json'
-PRODUCTS_F = 'products.json'
-PURCHASE_LOG_F = 'purchase_log.csv'
-COUNT_F = 'count.csv'
+TIME_OPERATED = time.strftime("%d/%m/%Y/%H:%M:%S") # the time the program operated
+
+DEALS_F = 'data/deals.json'
+PRODUCTS_F = 'data/products.json'
+PURCHASE_LOG_F = 'data/purchase_log.csv'
+COUNT_F = 'data/count.csv'
 
 def read_file(file_name):
     """
@@ -44,7 +46,6 @@ PURCHASE_LOG_DATA = read_file(PURCHASE_LOG_F)
 COUNT_DATA = read_file(COUNT_F)
 
 COUNT = 0 # count the value of every purchase (the sum of all the purchases)
-time_operated = time.strftime("%d/%m/%Y/%H:%M:%S") # the time the program operated
 
 def load_products():
     """
@@ -81,11 +82,16 @@ def price_calculator(barcode, amount):
     :return: the price of the products
     """
 
-    product_name = PRODUCTS_DATA[barcode][1]
+    name_dict = {"\u05d7\u05de\u05e6\u05d5\u05e5" : "hamzoz"}
+
+    product_name = name_dict[PRODUCTS_DATA[barcode][1]]
+    print(product_name)
 
     #check if the product is in the deals file
     if product_name in DEALS_DATA:
         for i in DEALS_DATA[product_name]:
+            print(DEALS_DATA[product_name])
+            print(DEALS_DATA[product_name][i][0])
 
             #check if the amount is enough for the deal
             if amount >= DEALS_DATA[product_name][i][0]:
@@ -139,12 +145,14 @@ def main():
     #functions check
     #data = read_file(COUNT_F)                         
     #write_file(COUNT_F, [time, time, count])             
-    load_products()                                   
+    #load_products()                                   
     #buy("1")      
 
     #every time do this when the program is done
     #time_end_operate = time.strftime("%d/%m/%Y/%H:%M:%S")
-    #write_file(COUNT_F, [time_operated, time_end_operate , COUNT])                
+    #write_file(COUNT_F, [time_operated, time_end_operate , COUNT])     
+
+    print(price_calculator("1",1))
     
 
 if __name__ == '__main__':
