@@ -44,8 +44,14 @@ def main():
             sg.Column([[sg.Frame("הוסף סוג", right_col, title_location="n")]], element_justification="center", vertical_alignment="top")],
     ]
 
+    # Determine scaling factor
+    root = sg.tk.Tk()
+    scaling = root.winfo_fpixels('1i')/23
+    root.destroy()
+
+
     # Create the window
-    window = sg.Window("My Window", layout, finalize=True, scaling=4, element_justification="right")
+    window = sg.Window("My Window", layout, finalize=True, scaling=scaling, element_justification="right")
     window.maximize()
     window.bind("<Delete>", "remove")
     window.bind("<Escape>", "reset_cursor")
