@@ -65,13 +65,14 @@ def load_products():
 
         barcode = input("\nscan product barcode: ")
         price = input("enter product price: ")
-        he_name = input("enter product name in hebrew: ")
         en_name = input("enter product name in english: ")
+        he_name = input("enter product name in hebrew: ")
 
         #update the products file with the new product barcode price and the name in hebrew
         with open(PRODUCTS_F, 'r') as f:
             data = json.load(f)
-        data1 = {barcode : [price, he_name]}
+
+        data1 = {barcode : [price, en_name]}
         data.update(data1)
         with open(PRODUCTS_F, 'w') as f:
             json.dump(data, f)
@@ -79,7 +80,7 @@ def load_products():
         #update the names file with the new names of the products in hebrew and english
         with open(NAMES_F, 'r') as f:
             data2 = json.load(f)
-        data3 = {he_name : en_name}
+        data3 = {en_name : he_name}
         data2.update(data3)
         with open(NAMES_F, 'w') as f:
             json.dump(data2, f)
@@ -104,7 +105,7 @@ def load_deals():
         #update the deals file with the new deal
         with open(DEALS_F, 'r') as f:
             data = json.load(f)
-        en_name = NAMES_DATA[PRODUCTS_DATA[barcode][1]]
+        en_name = PRODUCTS_DATA[barcode][1]
         data1 = {en_name : [amount, price]}
         data.update(data1)
         with open(DEALS_F, 'w') as f:
@@ -119,7 +120,7 @@ def price_calculator(barcode, amount):
     :return: the price of the products
     """
 
-    product_name = NAMES_DATA[PRODUCTS_DATA[barcode][1]]
+    product_name = PRODUCTS_DATA[barcode][1]
 
     #check if the product is in the deals file
     if product_name in DEALS_DATA:
@@ -149,23 +150,20 @@ def buy(barcode, amount = 1):
     :param amount: the amount of the product to buy (default is 1)
     """
 
-    with open(PRODUCTS_F, 'r') as f:
-        products = json.load(f)
-
-    if barcode in products:
+    if barcode in PRODUCTS_DATA:
         global COUNT
 
-        price = price_calculator(products[barcode][1], amount)
+        price = price_calculator(barcode, amount)
 
         #כרגע זה לבדיקה
-        print(products[barcode][1][::-1] + " ריחמ:" + price)
+        print(NAMES_DATA[PRODUCTS_DATA[barcode][1]][::-1] + " ריחמ:" + str(price))
         
+        #update the count file
         COUNT += float(price)
 
         #update the purchase log file after all one purchase done
         purchase_log = [str(time.strftime("%d/%m/%Y/%H:%M:%S")), barcode, amount, price, id]
         write_file(PURCHASE_LOG_F, purchase_log)
-
 
     else:
         print("product not found")
@@ -178,9 +176,9 @@ def main():
     #data = read_file(COUNT_F)                         
     #write_file(COUNT_F, [time, time, count])             
     #load_products()  
-    load_deals()                                 
-    #buy("1")      
-    #print(price_calculator("1",10))
+    #load_deals()                                 
+    buy("1")      
+    #print(price_calculator("1",7))
 
     #
     #every time do this when the program is done
