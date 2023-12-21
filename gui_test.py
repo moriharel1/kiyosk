@@ -4,7 +4,7 @@ import util
 from threading import Timer
 import time
 
-PRICES = json.load(open("data/products.json"))              # name: price
+PRICES = json.load(open("data/prices.json"))              # name: price
 DISTINCT_NAMES = list(PRICES.keys())
 BARCODES = json.load(open("data/barcodes.json"))            # barcode: name
 LANGUAGE_DICT = json.load(open("data/name_dictionary.json"))# english name: hebrew name
@@ -16,6 +16,35 @@ def calc_price_string(name, count):
     # price = util.price_calculator(code, count)
     price = round(float(PRICES[name]) * count, 5) # sometimes floating point errors happen so we round
     return "₪" + str(price)
+
+def collapse_cart(cart):
+    """
+    group the cart by name, and sum the count and price of each group. it will pick first barcode if any are provided.
+    (not that it really matters that much)
+
+    Args:
+        cart (list of lists): the cart, each element is [barcode, english name, hebrew name, count, price]
+    
+    Returns:
+        list of lists: the collapsed cart, each element is [barcode, english name, hebrew name, count, price]
+    """
+    
+    collapsed_cart = []
+    for barcode, name, hebrew_name, count, price in cart:
+        for i, (collapsed_barcode, collapsed_name, collapsed_hebrew_name, collapsed_count, collapsed_price) in enumerate(collapsed_cart):
+            if collapsed_name == name:
+                collapsed_cart[i][3] += count
+                collapsed_cart[i][4] = calc_price_string(name, collapsed_cart[i][3])
+                
+                if collapsed_cart[i][0] == "" and barcode != "":
+                    collapsed_cart[i][0] = barcode
+                
+                break
+        else:
+            collapsed_cart.append([barcode, name, hebrew_name, count, price])
+    
+    return collapsed_cart
+
 
 # functions to be replaced with util
 def finish_cart(cart):
@@ -42,16 +71,19 @@ def main():
 
     layout = [
         [sg.Column(left_layout, element_justification="center"),
-            sg.Column([[sg.Frame("הוסף סוג", right_col, title_location="n")]], element_justification="center", vertical_alignment="top")],
+            sg.Column([[sg.Frame("הוסף סוג", right_col, title_location="n")]],
+                        element_justification="center", vertical_alignment="top")],
     ]
 
     # Determine scaling factor
     root = sg.tk.Tk()
+    # this takes the height of the screen, divides by the dpi, and multiplies by constant to have the
+    # scale be proportional to screen's scale. so it works for any screen at any dpi
     scaling = root.winfo_screenmmheight() / root.winfo_fpixels('1i') * 1.75
     root.destroy()
 
     # Create the window
-    window = sg.Window("My Window", layout, finalize=True, scaling=scaling, element_justification="right", return_keyboard_events=True)
+    window = sg.Window("My Window", layout, finalize=True, scaling=scaling, element_justification="right")
     window.maximize()
     window.bind("<Delete>", "remove")
     window.bind("<Escape>", "reset_cursor")
@@ -88,6 +120,7 @@ def main():
                 elif values["barcode"] in BARCODES:
                     name = BARCODES[values["barcode"]]
                     cart.append([values["barcode"], name, LANGUAGE_DICT[name], 1, calc_price_string(name, 1)])
+                    cart = collapse_cart(cart)
                     window["barcode"].update("")
             
             case "remove":
@@ -105,6 +138,20 @@ def main():
             case "cursor_reset":
                 # it's recognized but it's delt with because it's an event 
                 pass
+            
+            case "times_custom_ok":
+                count = int(values["times_custom"])
+                if len(cart) == 0:
+                    continue
+                
+                positions = [-1]
+                if len(values['cart']) != 0:
+                    positions = values['cart']
+                
+                for position in positions:
+                    cart[position][3] = count
+                    cart[position][4] = calc_price_string(cart[position][1], count)
+
             
             case s if type(s) is str and s.startswith("times-"):
                 count = int(event.split("-")[1])
@@ -124,23 +171,17 @@ def main():
                 name = DISTINCT_NAMES[index]
 
                 cart.append(["", name, LANGUAGE_DICT[name], 1, calc_price_string(name, 1)])
+                cart = collapse_cart(cart)
             
-            case "times_custom_ok":
-                if len(cart) == 0:
-                    continue
-                
-                count = int(values["times_custom"])
-                cart[-1][2] = count
-                cart[-1][3] = calc_price_string(cart[-1][1], count)
             
             case sg.WINDOW_CLOSED:
                 break
-
+            
             case _:
                 print("Unknown event:", event, values)
 
         # Update the cart table in the GUI
-        window["cart"].update(cart)
+        window["cart"].update(reversed(cart))
         window["barcode"].set_focus()
 
     # Close the window
