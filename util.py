@@ -11,7 +11,7 @@ BARCODES_F = 'data/barcodes.json'       # barcode : en name
 PURCHASE_LOG_F = 'data/purchase_log.csv'
 COUNT_F = 'data/count.csv'
 
-def read_file(file_name):
+def read_file(file_name : str):
     """
     read the file and return the data without the first line (the titles in the csv file)
 
@@ -26,7 +26,7 @@ def read_file(file_name):
 
         return data
 
-def write_file(filename, data : list = []):
+def write_file(filename : str, data : list = []):
     """
     write the data to the file and keep what in there until now
 
@@ -123,19 +123,7 @@ def load_deals():
         with open(DEALS_F, 'w') as f:
             json.dump(data, f)
 
-def price_calculator_barcode(barcode, amount):
-    """
-    calculate the price of the product
-
-    :param barcode: the barcode of the product
-    :param amount: the amount of the product to buy
-    :return: the price of the products
-    """
-    
-    product_name = BARCODES_DATA[barcode]
-    return price_calculator_name(product_name, amount)
-
-def price_calculator_name(name, amount):
+def price_calculator(name: str, amount: int):
     """
     calculate the price of the product
 
@@ -149,7 +137,7 @@ def price_calculator_name(name, amount):
         #check if the amount is enough for the deal
         if amount >= DEALS_DATA[name][0]:
             #calculate the price
-            price = (amount // DEALS_DATA[name][0]) * DEALS_DATA[name][1] + (amount % DEALS_DATA[name][0]) * float(PRODUCTS_DATA[barcode][0])
+            price = (amount // DEALS_DATA[name][0]) * DEALS_DATA[name][1] + (amount % DEALS_DATA[name][0]) * float(PRICES_DATA[NAMES_DATA])
             return price
         
         else: #if the amount that buyed is not enough for the deal
@@ -161,7 +149,7 @@ def price_calculator_name(name, amount):
         price = amount * float(PRICES_DATA[name])
         return price
 
-def buy(barcode, amount = 1):
+def buy(barcode: str, name: str, amount: int = 1, id: str = -1):
     """
     buy the product and update the files
 
@@ -169,19 +157,19 @@ def buy(barcode, amount = 1):
     :param amount: the amount of the product to buy (default is 1)
     """
 
-    if barcode in BARCODES_DATA:
+    if name in PRICES_DATA:
         global COUNT
 
-        price = price_calculator_barcode(barcode, amount)
+        price = price_calculator(name, amount)
 
         #כרגע זה לבדיקה
-        print(NAMES_DATA[BARCODES_DATA[barcode]][::-1] + " ריחמ:" + str(price))
+        print(NAMES_DATA[name][::-1] + " ריחמ:" + str(price))
         
         #update the count file
         COUNT += float(price)
 
         #update the purchase log file after all one purchase done
-        purchase_log = [str(time.strftime("%d/%m/%Y/%H:%M:%S")), barcode, amount, price, id]
+        purchase_log = [str(time.strftime("%d/%m/%Y/%H:%M:%S")), barcode, name, amount, round(price,10), id]
         write_file(PURCHASE_LOG_F, purchase_log)
 
     else:
