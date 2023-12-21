@@ -3,6 +3,7 @@ import json
 import util
 from threading import Timer
 import time
+import uuid
 
 PRICES = json.load(open("data/prices.json"))              # name: price
 DISTINCT_NAMES = list(PRICES.keys())
@@ -13,8 +14,7 @@ def calc_price_string(name, count):
     """Calculate the price of a product given its name and count, this is temporary, should be in util
     then return it as a string with nis symbol"""
     
-    price = util.price_calculator_barcode(code, count)
-    # price = round(float(PRICES[name]) * count, 5) # sometimes floating point errors happen so we round
+    price = round(util.price_calculator_name(name, count), 10)
     return "₪" + str(price)
 
 def collapse_cart(cart):
@@ -49,7 +49,9 @@ def collapse_cart(cart):
 # functions to be replaced with util
 def finish_cart(cart):
     """Finish the cart and print the receipt, this is temporary, should be in util"""
-    print("Finished cart:", cart)
+    purchase_id = uuid.uuid4().hex
+    for barcode, name, hebrew_name, count, price in cart:
+        util.buy(name, barcode, count, purchase_id)
 
 
 def main():
