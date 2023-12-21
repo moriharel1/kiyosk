@@ -194,3 +194,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # store info about session
+    time_end_operate = time.strftime("%d/%m/%Y/%H:%M:%S")
+    write_file(COUNT_F, [time_operated, time_end_operate , COUNT])
