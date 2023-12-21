@@ -46,7 +46,7 @@ def main():
 
     # Determine scaling factor
     root = sg.tk.Tk()
-    scaling = root.winfo_fpixels('1i')/23
+    scaling = root.winfo_screenmmheight() / root.winfo_fpixels('1i') * 1.75
     root.destroy()
 
 
