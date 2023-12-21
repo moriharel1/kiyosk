@@ -182,9 +182,9 @@ def main():
     #functions check
     #data = read_file(COUNT_F)                         
     #write_file(COUNT_F, [time, time, count])             
-    #load_products()  
+    load_products()  
     #load_deals()                                 
-    buy("1")      
+    #buy("1")      
     #print(price_calculator("1",7))
 
     #
