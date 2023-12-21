@@ -149,7 +149,7 @@ def price_calculator_name(name, amount):
         #check if the amount is enough for the deal
         if amount >= DEALS_DATA[name][0]:
             #calculate the price
-            price = (amount // DEALS_DATA[name][0]) * DEALS_DATA[name][1] + (amount % DEALS_DATA[name][0]) * float(PRODUCTS_DATA[barcode][0])
+            price = (amount // DEALS_DATA[name][0]) * DEALS_DATA[name][1] + (amount % DEALS_DATA[name][0]) * float(PRICES_DATA[NAMES_DATA])
             return price
         
         else: #if the amount that buyed is not enough for the deal
