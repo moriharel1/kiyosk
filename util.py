@@ -123,35 +123,42 @@ def load_deals():
         with open(DEALS_F, 'w') as f:
             json.dump(data, f)
 
-def price_calculator(barcode, amount):
+def price_calculator_barcode(barcode, amount):
     """
     calculate the price of the product
 
-    :param barcode: the name of the product
+    :param barcode: the barcode of the product
+    :param amount: the amount of the product to buy
+    :return: the price of the products
+    """
+    
+    product_name = BARCODES_DATA[barcode]
+    return price_calculator_name(product_name, amount)
+
+def price_calculator_name(name, amount):
+    """
+    calculate the price of the product
+
+    :param name: the name of the product
     :param amount: the amount of the product to buy
     :return: the price of the products
     """
 
-    product_name = BARCODES_DATA[barcode]
-
     #check if the product is in the deals file
-    if product_name in DEALS_DATA:
-        print(DEALS_DATA[product_name])
-        print(DEALS_DATA[product_name][0])
-
+    if name in DEALS_DATA:
         #check if the amount is enough for the deal
-        if amount >= DEALS_DATA[product_name][0]:
+        if amount >= DEALS_DATA[name][0]:
             #calculate the price
-            price = (amount // DEALS_DATA[product_name][0]) * DEALS_DATA[product_name][1] + (amount % DEALS_DATA[product_name][0]) * float(PRODUCTS_DATA[barcode][0])
+            price = (amount // DEALS_DATA[name][0]) * DEALS_DATA[name][1] + (amount % DEALS_DATA[name][0]) * float(PRODUCTS_DATA[barcode][0])
             return price
         
         else: #if the amount that buyed is not enough for the deal
             #calculate the price
-            price = amount * float(PRICES_DATA[BARCODES_DATA[barcode]])
+            price = amount * float(PRICES_DATA[name])
             return price
             
     else: #if the product is not in the deals file calculate the regular price
-        price = amount * float(PRICES_DATA[BARCODES_DATA[barcode]])
+        price = amount * float(PRICES_DATA[name])
         return price
 
 def buy(barcode, amount = 1):
@@ -165,7 +172,7 @@ def buy(barcode, amount = 1):
     if barcode in BARCODES_DATA:
         global COUNT
 
-        price = price_calculator(barcode, amount)
+        price = price_calculator_barcode(barcode, amount)
 
         #כרגע זה לבדיקה
         print(NAMES_DATA[BARCODES_DATA[barcode]][::-1] + " ריחמ:" + str(price))
