@@ -30,7 +30,7 @@ def main():
             [sg.Frame("אחר",[[sg.Spin([i for i in range(1000)],key="times_custom"), sg.Button("החל", key="times_custom_ok")]], title_location="n")],
         [sg.Table(  justification="center", values=[], headings=["ברקוד", "פריט", "כמות", "מחיר"], col_widths=[15,13,6,6],
                     auto_size_columns=False, key="cart")],
-        [sg.Button("סיום קנייה", key="done", bind_return_key=True), sg.Button("הסר פריט", key="remove")]
+        [sg.Button("סיום קנייה", key="done", bind_return_key=True), sg.Button("הסר פריט", key="remove"), sg.Button("אפס קניה", key="clear")]
     ]
     
     max_width = max([len(name) for name in DISTINCT_NAMES])
@@ -48,7 +48,6 @@ def main():
     root = sg.tk.Tk()
     scaling = root.winfo_screenmmheight() / root.winfo_fpixels('1i') * 1.75
     root.destroy()
-
 
     # Create the window
     window = sg.Window("My Window", layout, finalize=True, scaling=scaling, element_justification="right")
@@ -93,6 +92,9 @@ def main():
                 to_remove = values['cart']
                 for index in sorted(to_remove, reverse=True):
                     del cart[index]
+            
+            case "clear":
+                cart = []
             
             case "done":
                 finish_cart(cart)
