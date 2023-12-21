@@ -51,7 +51,7 @@ def finish_cart(cart):
     """Finish the cart and print the receipt, this is temporary, should be in util"""
     purchase_id = uuid.uuid4().hex
     for barcode, name, hebrew_name, count, price in cart:
-        util.buy(name, barcode, count, purchase_id)
+        util.buy(barcode, name, count, purchase_id)
 
 
 def main():
@@ -196,4 +196,4 @@ if __name__ == "__main__":
     main()
     # store info about session
     time_end_operate = time.strftime("%d/%m/%Y/%H:%M:%S")
-    write_file(COUNT_F, [time_operated, time_end_operate , COUNT])
+    util.write_file(util.COUNT_F, [util.TIME_OPERATED, time_end_operate , util.COUNT])
