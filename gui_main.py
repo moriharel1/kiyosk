@@ -14,7 +14,7 @@ def calc_price_string(name, count):
     """Calculate the price of a product given its name and count, this is temporary, should be in util
     then return it as a string with nis symbol"""
     
-    price = round(util.price_calculator_name(name, count), 10)
+    price = round(util.price_calculator(name, count), 10)
     return "₪" + str(price)
 
 def collapse_cart(cart):
