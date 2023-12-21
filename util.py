@@ -3,9 +3,11 @@ import time
 
 TIME_OPERATED = time.strftime("%d/%m/%Y/%H:%M:%S") # the time the program operated
 
-DEALS_F = 'data/deals.json'
-PRODUCTS_F = 'data/products.json'
-NAMES_F = 'data/name_dictionary.json'
+DEALS_F = 'data/deals.json'             # en name : [amount, price]
+PRICES_F = 'data/prices.json'           # en name : price   
+NAMES_F = 'data/name_dictionary.json'   # en name : he name
+BARCODES_F = 'data/barcodes.json'       # barcode : en name
+
 PURCHASE_LOG_F = 'data/purchase_log.csv'
 COUNT_F = 'data/count.csv'
 
@@ -37,14 +39,17 @@ def write_file(filename, data : list = []):
             f.write(str(i) + ', ')
         f.write('\n')
 
-with open(PRODUCTS_F, 'r') as f:
-    PRODUCTS_DATA = json.load(f)
+with open(PRICES_F, 'r') as f:
+    PRICES_DATA = json.load(f)
 
 with open(DEALS_F, 'r') as f:
     DEALS_DATA = json.load(f)
     
 with open(NAMES_F, 'r') as f:
     NAMES_DATA = json.load(f)
+
+with open(BARCODES_F, 'r') as f:
+    BARCODES_DATA = json.load(f)
 
 PURCHASE_LOG_DATA = read_file(PURCHASE_LOG_F)
 COUNT_DATA = read_file(COUNT_F)
@@ -68,13 +73,20 @@ def load_products():
         en_name = input("enter product name in english: ")
         he_name = input("enter product name in hebrew: ")
 
-        #update the products file with the new product barcode price and the name in hebrew
-        with open(PRODUCTS_F, 'r') as f:
+        #update the barcodes file with the new barcode
+        with open(BARCODES_F, 'r') as f:
             data = json.load(f)
-
-        data1 = {barcode : [price, en_name]}
+        data1 = {barcode : en_name}
         data.update(data1)
-        with open(PRODUCTS_F, 'w') as f:
+        with open(BARCODES_F, 'w') as f:
+            json.dump(data, f)
+
+        #update the products file with the new product price
+        with open(PRICES_F, 'r') as f:
+            data = json.load(f)
+        data1 = {en_name : price}
+        data.update(data1)
+        with open(PRICES_F, 'w') as f:
             json.dump(data, f)
 
         #update the names file with the new names of the products in hebrew and english
@@ -105,7 +117,7 @@ def load_deals():
         #update the deals file with the new deal
         with open(DEALS_F, 'r') as f:
             data = json.load(f)
-        en_name = PRODUCTS_DATA[barcode][1]
+        en_name = BARCODES_DATA[barcode]
         data1 = {en_name : [amount, price]}
         data.update(data1)
         with open(DEALS_F, 'w') as f:
@@ -120,7 +132,7 @@ def price_calculator(barcode, amount):
     :return: the price of the products
     """
 
-    product_name = PRODUCTS_DATA[barcode][1]
+    product_name = BARCODES_DATA[barcode]
 
     #check if the product is in the deals file
     if product_name in DEALS_DATA:
@@ -135,11 +147,11 @@ def price_calculator(barcode, amount):
         
         else: #if the amount that buyed is not enough for the deal
             #calculate the price
-            price = amount * float(PRODUCTS_DATA[barcode][0])
+            price = amount * float(PRICES_DATA[BARCODES_DATA[barcode]])
             return price
             
     else: #if the product is not in the deals file calculate the regular price
-        price = amount * PRODUCTS_DATA[barcode][0]
+        price = amount * float(PRICES_DATA[BARCODES_DATA[barcode]])
         return price
 
 def buy(barcode, amount = 1):
@@ -150,13 +162,13 @@ def buy(barcode, amount = 1):
     :param amount: the amount of the product to buy (default is 1)
     """
 
-    if barcode in PRODUCTS_DATA:
+    if barcode in BARCODES_DATA:
         global COUNT
 
         price = price_calculator(barcode, amount)
 
         #כרגע זה לבדיקה
-        print(NAMES_DATA[PRODUCTS_DATA[barcode][1]][::-1] + " ריחמ:" + str(price))
+        print(NAMES_DATA[BARCODES_DATA[barcode]][::-1] + " ריחמ:" + str(price))
         
         #update the count file
         COUNT += float(price)
