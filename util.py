@@ -118,7 +118,7 @@ def load_deals():
         with open(DEALS_F, 'r') as f:
             data = json.load(f)
         en_name = BARCODES_DATA[barcode]
-        data1 = {en_name : [amount, price]}
+        data1 = {en_name : [int(amount), float(price)]}
         data.update(data1)
         with open(DEALS_F, 'w') as f:
             json.dump(data, f)
@@ -163,7 +163,7 @@ def buy(barcode: str, name: str, amount: int = 1, id: str = -1):
         price = price_calculator(name, amount)
 
         #כרגע זה לבדיקה
-        print(NAMES_DATA[name][::-1] + " ריחמ:" + str(price))
+        print(NAMES_DATA[name] + "price:" + str(price))
         
         #update the count file
         COUNT += float(price)
@@ -182,8 +182,8 @@ def main():
     #functions check
     #data = read_file(COUNT_F)                         
     #write_file(COUNT_F, [time, time, count])             
-    load_products()  
-    #load_deals()                                 
+    #load_products()  
+    load_deals()                                 
     #buy("1")      
     #print(price_calculator("1",7))
 
