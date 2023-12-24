@@ -131,7 +131,7 @@ def main():
                     window["barcode"].update("")
             
             case "remove":
-                to_remove = values['cart']
+                to_remove = [len(cart) - i - 1 for i in values['cart']]
                 for index in sorted(to_remove, reverse=True):
                     del cart[index]
             
