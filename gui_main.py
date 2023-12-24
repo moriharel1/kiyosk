@@ -96,7 +96,6 @@ def main():
     # State
     cart = [] # list of [barcode, english name, hebrew name, count, price]
     last_barcode_key_time = 0
-    last_total = 0
     
     # helper function for clearing the barcode after 1 second of no keypresses
     def barcode_clear_timer(start_time, cur_value):
@@ -140,7 +139,7 @@ def main():
                 cart = []
             
             case "done":
-                last_total = finish_cart(cart)
+                finish_cart(cart)
                 cart = []
             
             case "cursor_reset":
@@ -191,8 +190,11 @@ def main():
         # Update the cart table in the GUI
         window["cart"].update(reversed(cart))
         window["barcode"].set_focus()
-        if last_total != 0:
-            window["total"].update("סה\"כ: ₪" + str(last_total))
+        if cart != []:
+            total = 0
+            for item in cart:
+                total += util.price_calculator(item[1], item[3])
+            window["total"].update("סה\"כ: ₪" + str(total))
 
     # Close the window
     last_barcode_key_time = -1  # this is to prevent the timer from trying to clear
