@@ -49,9 +49,12 @@ def collapse_cart(cart):
 # functions to be replaced with util
 def finish_cart(cart):
     """Finish the cart and print the receipt, this is temporary, should be in util"""
+    final_price = 0
     purchase_id = uuid.uuid4().hex
     for barcode, name, hebrew_name, count, price in cart:
-        util.buy(barcode, name, count, purchase_id)
+        final_price += util.buy(barcode, name, count, purchase_id)
+    
+    return final_price
 
 
 def main():
@@ -62,7 +65,7 @@ def main():
             [sg.Frame("אחר",[[sg.Spin([i for i in range(1000)],key="times_custom"), sg.Button("החל", key="times_custom_ok")]], title_location="n")],
         [sg.Table(  justification="center", values=[], headings=["ברקוד", "name", "פריט", "כמות", "מחיר"], col_widths=[15,0,14,6,6],
                     auto_size_columns=False, visible_column_map=[True,False,True,True,True], key="cart")], # don't include the english name column
-        [sg.Button("סיום קנייה", key="done", bind_return_key=True), sg.Button("הסר פריט", key="remove"), sg.Button("אפס קניה", key="clear")]
+        [sg.Button("סיום קנייה", key="done", bind_return_key=True), sg.Button("הסר פריט", key="remove"), sg.Button("אפס קניה", key="clear"), sg.Text("", key="total")]
     ]
     
     max_width = max([len(LANGUAGE_DICT[name]) for name in DISTINCT_NAMES])
@@ -93,6 +96,8 @@ def main():
     # State
     cart = [] # list of [barcode, english name, hebrew name, count, price]
     last_barcode_key_time = 0
+    
+    # helper function for clearing the barcode after 1 second of no keypresses
     def barcode_clear_timer(start_time, cur_value):
         nonlocal last_barcode_key_time
         if last_barcode_key_time == -1: # the window was closed
@@ -126,7 +131,7 @@ def main():
                     window["barcode"].update("")
             
             case "remove":
-                to_remove = values['cart']
+                to_remove = [len(cart) - i - 1 for i in values['cart']]
                 for index in sorted(to_remove, reverse=True):
                     del cart[index]
             
@@ -185,6 +190,11 @@ def main():
         # Update the cart table in the GUI
         window["cart"].update(reversed(cart))
         window["barcode"].set_focus()
+        if cart != []:
+            total = 0
+            for item in cart:
+                total += util.price_calculator(item[1], item[3])
+            window["total"].update("סה\"כ: ₪" + str(total))
 
     # Close the window
     last_barcode_key_time = -1  # this is to prevent the timer from trying to clear

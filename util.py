@@ -263,9 +263,11 @@ def buy(barcode: str, name: str, amount: int = 1, id: str = -1):
         #update the purchase log file after all one purchase done
         purchase_log = [str(time.strftime("%d/%m/%Y/%H:%M:%S")), barcode, name, amount, round(price,10), id]
         write_file(PURCHASE_LOG_F, purchase_log)
+        return price
 
     else:
         print("product not found")
+        return 0
 
 
 
