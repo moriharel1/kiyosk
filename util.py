@@ -118,7 +118,7 @@ def load_deals():
         data.update(data1)
         with open(DEALS_F, 'w') as f:
             json.dump(data, f)
-
+          
 def change_product_price():
     """
     change the price of the product
@@ -169,31 +169,43 @@ def change_product_en_name():
     data2 = NAMES_DATA
     data3 = {new_en_name : NAMES_DATA[BARCODES_DATA[barcode]]}
     data2.update(data3)
-    with open(NAMES_F, 'w') as f:
-        json.dump(data2, f)
 
-    #update the deals file with the new english name of the product
-    data4 = DEALS_DATA
-    data5 = {new_en_name : DEALS_DATA[BARCODES_DATA[barcode]]}
-    data4.update(data5)
-    with open(DEALS_F, 'w') as f:
-        json.dump(data4, f)
+    if BARCODES_DATA[barcode] in DEALS_DATA: # no all the products have a deal
+        #update the deals file with the new english name of the product
+        data4 = DEALS_DATA
+        data5 = {new_en_name : DEALS_DATA[BARCODES_DATA[barcode]]}
+        data4.update(data5)
 
     #update the prices file with the new english name of the product
     data6 = PRICES_DATA
     data7 = {new_en_name : PRICES_DATA[BARCODES_DATA[barcode]]}
     data6.update(data7)
-    with open(PRICES_F, 'w') as f:
-        json.dump(data6, f)
+
+    #delete the old data from the files
+    if BARCODES_DATA[barcode] in DEALS_DATA: # no all the products have a deal
+        data4.pop(BARCODES_DATA[barcode])
+    data6.pop(BARCODES_DATA[barcode])
+    data2.pop(BARCODES_DATA[barcode])
 
     #update the barcodes file with the new english name of the product
     data = BARCODES_DATA
     data1 = {barcode : new_en_name}
     data.update(data1)
+    
+
+    # write the new data to the files
+    if BARCODES_DATA[barcode] in DEALS_DATA: # no all the products have a deal
+        with open(DEALS_F, 'w') as f:
+            json.dump(data4, f)
+
+    with open(NAMES_F, 'w') as f:
+        json.dump(data2, f)
+
+    with open(PRICES_F, 'w') as f:
+        json.dump(data6, f)
+
     with open(BARCODES_F, 'w') as f:
         json.dump(data, f)
-
-
 
 def change_product_deal(): 
     """
@@ -268,8 +280,7 @@ def buy(barcode: str, name: str, amount: int = 1, id: str = -1):
     else:
         print("product not found")
         return 0
-
-
+        
 
 def main():
 
@@ -289,9 +300,7 @@ def main():
     #
     #every time do this when the program is done
     #time_end_operate = time.strftime("%d/%m/%Y/%H:%M:%S")
-    #write_file(COUNT_F, [time_operated, time_end_operate , COUNT])     
-
-    
+    #write_file(COUNT_F, [time_operated, time_end_operate , COUNT])   
 
 if __name__ == '__main__':
-    main()
+    main()       # נתנאל המלך!
