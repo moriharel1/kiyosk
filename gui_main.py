@@ -10,10 +10,24 @@ DISTINCT_NAMES = list(PRICES.keys())
 BARCODES = json.load(open("data/barcodes.json"))            # barcode: name
 LANGUAGE_DICT = json.load(open("data/name_dictionary.json"))# english name: hebrew name
 
-def calc_price_string(name, count):
-    """Calculate the price of a product given its name and count, this is temporary, should be in util
-    then return it as a string with nis symbol"""
+def calc_price_string(name: str, count: int):
+    """
+    The calc_price_string function takes a name and count of items,
+        calculates the price for that item, and returns a string with the price.
+        
+        Args:
+            name (str): The name of an item in our inventory.
+            count (int): The number of items to be purchased.  Must be greater than 0.
     
+    Args:
+        name: Get the price of a specific item from the util
+        count: Calculate the price of a specific item
+    
+    Returns:
+        A string of the price
+    """
+    
+    # round to 10 decimal places to avoid floating point errors
     price = round(util.price_calculator(name, count), 10)
     return "₪" + str(price)
 
@@ -45,16 +59,12 @@ def collapse_cart(cart):
     
     return collapsed_cart
 
-
 def finish_cart(cart, payment_method: int = 0):
     """send the util all the info about the purchase. this is temporary, should be in util
 
     Args:
-        cart (list): a 2d list in the format of [barcode, english name, hebrew name, count, price] for each item
+        cart (list of lists): a 2d list in the format of [barcode, english name, hebrew name, count, price] for each item
         payment_method (int, optional): 0: cash, 1: bit. Defaults to 0.
-
-    Returns:
-        _type_: _description_
     """
     final_price = 0
     purchase_id = uuid.uuid4().hex
@@ -63,9 +73,11 @@ def finish_cart(cart, payment_method: int = 0):
     
     return final_price
 
-
 def main():
-    # Define the layout
+    """initialize the GUI and run the event loop"""
+    
+    #      Make the GUI layout
+    # this is the place for the main part of the GUI
     left_layout = [
         [sg.Input("", key="barcode", enable_events=True)],
         [sg.Frame("כמות", [[sg.Button("×"+str(i), key="times-"+str(i)) for i in range(1,11)]], title_location='n')]+
@@ -76,23 +88,27 @@ def main():
     ]
     
     max_width = max([len(LANGUAGE_DICT[name]) for name in DISTINCT_NAMES])
+    # this is the place for the right side buttons of the GUI
     right_col = [
         [sg.Button(LANGUAGE_DICT[name], key="product-"+str(i), size=(max_width,1))]
             for i, name in enumerate(DISTINCT_NAMES)
     ]
 
+    # the final GUI layout
     layout = [
         [sg.Column(left_layout, element_justification="center"),
             sg.Column([[sg.Frame("הוסף סוג", right_col, title_location="n")]],
                         element_justification="center", vertical_alignment="top")],
     ]
 
-    # Determine scaling factor
+
+    #       Determine scaling factor
     root = sg.tk.Tk()
     # this takes the height of the screen, divides by the dpi, and multiplies by constant to have the
     # scale be proportional to screen's scale. so it works for any screen at any dpi
     scaling = root.winfo_screenmmheight() / root.winfo_fpixels('1i') * 1.75
     root.destroy()
+
 
     # Create the window
     window = sg.Window("My Window", layout, finalize=True, scaling=scaling, element_justification="right")
@@ -100,12 +116,18 @@ def main():
     window.bind("<Delete>", "remove")
     window.bind("<Escape>", "reset_cursor")
 
-    # State
+    # State variables
     cart = [] # list of [barcode, english name, hebrew name, count, price]
     last_barcode_key_time = 0
     
-    # helper function for clearing the barcode after 1 second of no keypresses
+    # helper function for clearing the barcode after short amount of time of no keypresses
     def barcode_clear_timer(start_time, cur_value):
+        """helper function for clearing the barcode input field after a short amount of time
+
+        Args:
+            start_time (_type_): _description_
+            cur_value (_type_): _description_
+        """
         nonlocal last_barcode_key_time
         if last_barcode_key_time == -1: # the window was closed
             return
@@ -117,12 +139,12 @@ def main():
                     cur_value = '10'
                 window.write_event_value("times-"+cur_value, None)
 
-    # Event loop
+    #       Event loop
     while True:
         event, values = window.read()
         match event:
-            case "barcode":
-                # clear the barcode after 1 second of no keypresses
+            case "barcode":  # run when a key is pressed in the barcode input field
+                # clear the barcode after 0.5 seconds of no keypresses
                 last_barcode_key_time = time.time()
                 Timer(0.5, barcode_clear_timer, [last_barcode_key_time, values["barcode"]]).start()
                 
@@ -137,55 +159,72 @@ def main():
                     cart = collapse_cart(cart)
                     window["barcode"].update("")
             
-            case "remove":
+            case "remove":  # button to remove the selected items from the cart
+                # get the selected items from the cart
+                            # the cart is reversed, so we need to reverse the positions
                 to_remove = [len(cart) - i - 1 for i in values['cart']]
+                
+                # remove them
                 for index in sorted(to_remove, reverse=True):
                     del cart[index]
             
-            case "clear":
+            case "clear":   # button to clear the cart
                 cart = []
             
-            case "done" | "done_bit":
+            case "done" | "done_bit":   # button to finish the purchase, either with cash or bit
+                # just calls the function to talk to the util and clears the cart.
                 finish_cart(cart, 1 if event == "done_bit" else 0)
                 cart = []
             
-            case "cursor_reset":
+            case "cursor_reset":    # this is an event that's triggered when esc or such are 
+                                    # pressed. just reset the cursor to the barcode input field
+                                
                 # it's recognized but it's delt with because it's an event 
                 pass
             
-            case "times_custom_ok":
-                count = int(values["times_custom"])
+            case "times_custom_ok":     # button to set the count of the selected items to the custom count
+                count = int(values["times_custom"])   # get the count from the input field
                 if len(cart) == 0:
                     continue
                 
+                # get the selected items from the cart
+                # if none are selected, select last item that was added
                 positions = [-1]
                 if len(values['cart']) != 0:
-                    positions = values['cart']
+                                # the cart is reversed, so we need to reverse the positions
+                    positions = [len(cart) - i - 1 for i in values['cart']]
                 
+                # update the count and price of the selected items
                 for position in positions:
                     cart[position][3] = count
                     cart[position][4] = calc_price_string(cart[position][1], count)
 
-            
-            case s if type(s) is str and s.startswith("times-"):
-                count = int(event.split("-")[1])
+            case s if type(s) is str and s.startswith("times-"):    # any of the x1, x2, ... buttons
+                count = int(event.split("-")[1])    # get the count from the button
                 if len(cart) == 0:
                     continue
                 
+                # get the selected items from the cart
+                # if none are selected, select last item that was added
                 positions = [-1]
                 if len(values['cart']) != 0:
                     positions = values['cart']
                 
+                # update the count and price of the selected items
                 for position in positions:
                     cart[position][3] = count
                     cart[position][4] = calc_price_string(cart[position][1], count)
             
+                                        # any of the product buttons on the right side
             case s if type(s) is str and (s.startswith("product-") or s.isnumeric()):
-                index = int(s.split("-")[-1])
-                name = DISTINCT_NAMES[index]
+                index = int(s.split("-")[-1])   # get the index of the product
+                name = DISTINCT_NAMES[index]    # get the name of the product
 
+                # add the product to the cart
                 cart.append(["", name, LANGUAGE_DICT[name], 1, calc_price_string(name, 1)])
                 cart = collapse_cart(cart)
+            
+            
             
             
             case sg.WINDOW_CLOSED:
@@ -196,7 +235,11 @@ def main():
 
         # Update the cart table in the GUI
         window["cart"].update(reversed(cart))
+        
+        # Make sure the barcode input field is focused
         window["barcode"].set_focus()
+        
+        # Update the total price
         if cart != []:
             total = 0
             for item in cart:
@@ -209,16 +252,21 @@ def main():
     window.close()
 
 
+
+
 if __name__ == "__main__":
+    # we catch errors here so we can store info about the session, and only then propagate the error
     err = None
     try:
         main()
     except Exception as e:
         err = e
     
+    
     # store info about session
     time_end_operate = time.strftime("%d/%m/%Y/%H:%M:%S")
     util.write_file(util.COUNT_F, [util.TIME_OPERATED, time_end_operate , util.COUNT])
+    
     
     # we still want to propagate the error
     if err is not None:
