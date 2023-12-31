@@ -46,13 +46,20 @@ def collapse_cart(cart):
     return collapsed_cart
 
 
-# functions to be replaced with util
-def finish_cart(cart):
-    """Finish the cart and print the receipt, this is temporary, should be in util"""
+def finish_cart(cart, payment_method: int = 0):
+    """send the util all the info about the purchase. this is temporary, should be in util
+
+    Args:
+        cart (list): a 2d list in the format of [barcode, english name, hebrew name, count, price] for each item
+        payment_method (int, optional): 0: cash, 1: bit. Defaults to 0.
+
+    Returns:
+        _type_: _description_
+    """
     final_price = 0
     purchase_id = uuid.uuid4().hex
     for barcode, name, hebrew_name, count, price in cart:
-        final_price += util.buy(barcode, name, count, purchase_id)
+        final_price += util.buy(barcode, name, count, purchase_id, payment_method)
     
     return final_price
 
@@ -65,7 +72,7 @@ def main():
             [sg.Frame("אחר",[[sg.Spin([i for i in range(1000)],key="times_custom"), sg.Button("החל", key="times_custom_ok")]], title_location="n")],
         [sg.Table(  justification="center", values=[], headings=["ברקוד", "name", "פריט", "כמות", "מחיר"], col_widths=[15,0,14,6,6],
                     auto_size_columns=False, visible_column_map=[True,False,True,True,True], key="cart")], # don't include the english name column
-        [sg.Button("סיום קנייה", key="done", bind_return_key=True), sg.Button("הסר פריט", key="remove"), sg.Button("אפס קניה", key="clear"), sg.Text("", key="total")]
+        [sg.Button("סיום קנייה בביט", key="done_bit"),sg.Button("סיום קנייה", key="done", bind_return_key=True), sg.Button("הסר פריט", key="remove"), sg.Button("אפס קניה", key="clear"), sg.Text("", key="total")]
     ]
     
     max_width = max([len(LANGUAGE_DICT[name]) for name in DISTINCT_NAMES])
@@ -138,8 +145,8 @@ def main():
             case "clear":
                 cart = []
             
-            case "done":
-                finish_cart(cart)
+            case "done" | "done_bit":
+                finish_cart(cart, 1 if event == "done_bit" else 0)
                 cart = []
             
             case "cursor_reset":
@@ -203,7 +210,16 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    err = None
+    try:
+        main()
+    except Exception as e:
+        err = e
+    
     # store info about session
     time_end_operate = time.strftime("%d/%m/%Y/%H:%M:%S")
     util.write_file(util.COUNT_F, [util.TIME_OPERATED, time_end_operate , util.COUNT])
+    
+    # we still want to propagate the error
+    if err is not None:
+        raise err
