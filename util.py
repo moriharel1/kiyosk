@@ -39,6 +39,7 @@ def write_file(filename : str, data : list = []):
             f.write(str(i) + ', ')
         f.write('\n')
 
+# load the data from the files
 with open(PRICES_F, 'r') as f:
     PRICES_DATA = json.load(f)
 
@@ -191,7 +192,7 @@ def change_product_en_name():
     data = BARCODES_DATA
     data1 = {barcode : new_en_name}
     data.update(data1)
-    
+
 
     # write the new data to the files
     if BARCODES_DATA[barcode] in DEALS_DATA: # no all the products have a deal
@@ -227,6 +228,36 @@ def change_product_deal():
     with open(DEALS_F, 'w') as f:
         json.dump(data, f)
 
+def delete_product_by_barcode():
+    """
+    delete the product from the files
+
+    :input: barcode
+    """
+    
+    barcode = input("\nscan product barcode: ")
+
+    #delete the product from the files
+    if BARCODES_DATA[barcode] in DEALS_DATA: # no all the products have a deal
+        DEALS_DATA.pop(BARCODES_DATA[barcode])
+    PRICES_DATA.pop(BARCODES_DATA[barcode])
+    NAMES_DATA.pop(BARCODES_DATA[barcode])
+    BARCODES_DATA.pop(barcode)
+
+    # write the new data to the files
+    
+    with open(DEALS_F, 'w') as f: # maybe it update the same data and dont pop enything beacuse not all the products have a deal
+        json.dump(DEALS_DATA, f)
+
+    with open(NAMES_F, 'w') as f:
+        json.dump(NAMES_DATA, f)
+
+    with open(PRICES_F, 'w') as f:
+        json.dump(PRICES_DATA, f)
+
+    with open(BARCODES_F, 'w') as f:
+        json.dump(BARCODES_DATA, f)
+
 def price_calculator(name: str, amount: int):
     """
     calculate the price of the product
@@ -253,12 +284,15 @@ def price_calculator(name: str, amount: int):
         price = amount * float(PRICES_DATA[name])
         return price
 
-def buy(barcode: str, name: str, amount: int = 1, id: str = -1):
+def buy(barcode: str, name: str, amount: int = 1, id: str = -1, payment_type: int = 0):
     """
     buy the product and update the files
 
     :param barcode: the barcode of the product
+    :param name: the name of the product
     :param amount: the amount of the product to buy (default is 1)
+    :param id: the id of the buying
+    :param payment_type: the type of the payment (default is 0 mean cash, 1 is bit)
     """
 
     if name in PRICES_DATA:
@@ -266,14 +300,14 @@ def buy(barcode: str, name: str, amount: int = 1, id: str = -1):
 
         price = price_calculator(name, amount)
 
-        #כרגע זה לבדיקה
-        print(NAMES_DATA[name] + "price:" + str(price))
+        # check line
+        # print(NAMES_DATA[name] + "price:" + str(price))
         
         #update the count file
         COUNT += float(price)
 
         #update the purchase log file after all one purchase done
-        purchase_log = [str(time.strftime("%d/%m/%Y/%H:%M:%S")), barcode, name, amount, round(price,10), id]
+        purchase_log = [str(time.strftime("%d/%m/%Y/%H:%M:%S")), barcode, name, amount, round(price,10), id, payment_type]
         write_file(PURCHASE_LOG_F, purchase_log)
         return price
 
@@ -284,23 +318,23 @@ def buy(barcode: str, name: str, amount: int = 1, id: str = -1):
 
 def main():
 
-    #functions check
-    #data = read_file(COUNT_F)                         
-    #write_file(COUNT_F, [time, time, count])             
-    load_products()  
-    load_deals()                                 
-    change_product_price()
-    change_product_en_name()
-    change_product_he_name()
-    change_product_deal()
+    # functions check
+    # data = read_file(COUNT_F)                         
+    # write_file(COUNT_F, [time, time, count])             
+    # load_products()  
+    # load_deals()                                 
+    # change_product_price()
+    # change_product_en_name()
+    # change_product_he_name()
+    # change_product_deal()
 
-    #buy("1")      
-    #print(price_calculator("1",7))
+    buy("123456", BARCODES_DATA["123456"], payment_type=1)      
+    # print(price_calculator("1",7))
 
-    #
-    #every time do this when the program is done
-    #time_end_operate = time.strftime("%d/%m/%Y/%H:%M:%S")
-    #write_file(COUNT_F, [time_operated, time_end_operate , COUNT])   
+    
+    # every time do this when the program is done
+    # time_end_operate = time.strftime("%d/%m/%Y/%H:%M:%S")
+    # write_file(COUNT_F, [time_operated, time_end_operate , COUNT])   
 
 if __name__ == '__main__':
     main()       # נתנאל המלך!
