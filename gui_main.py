@@ -45,7 +45,7 @@ def collapse_cart(cart):
     
     collapsed_cart = []
     for barcode, name, hebrew_name, count, price in cart:
-        for i, (collapsed_barcode, collapsed_name, collapsed_hebrew_name, collapsed_count, collapsed_price) in enumerate(collapsed_cart):
+        for i, (_collapsed_barcode, collapsed_name, _collapsed_hebrew_name, _collapsed_count, _collapsed_price) in enumerate(collapsed_cart):
             if collapsed_name == name:
                 collapsed_cart[i][3] += count
                 collapsed_cart[i][4] = calc_price_string(name, collapsed_cart[i][3])
@@ -65,6 +65,9 @@ def finish_cart(cart, payment_method: int = 0):
     Args:
         cart (list of lists): a 2d list in the format of [barcode, english name, hebrew name, count, price] for each item
         payment_method (int, optional): 0: cash, 1: bit. Defaults to 0.
+    
+    Returns:
+        the total price of the cart in the end
     """
     final_price = 0
     purchase_id = uuid.uuid4().hex
@@ -81,7 +84,7 @@ def main():
     left_layout = [
         [sg.Input("", key="barcode", enable_events=True)],
         [sg.Frame("כמות", [[sg.Button("×"+str(i), key="times-"+str(i)) for i in range(1,11)]], title_location='n')]+
-            [sg.Frame("אחר",[[sg.Spin([i for i in range(1000)],key="times_custom"), sg.Button("החל", key="times_custom_ok")]], title_location="n")],
+            [sg.Frame("אחר",[[sg.Spin(list(range(1000)),key="times_custom"), sg.Button("החל", key="times_custom_ok")]], title_location="n")],
         [sg.Table(  justification="center", values=[], headings=["ברקוד", "name", "פריט", "כמות", "מחיר"], col_widths=[15,0,14,6,6],
                     auto_size_columns=False, visible_column_map=[True,False,True,True,True], key="cart")], # don't include the english name column
         [sg.Button("סיום קנייה בביט", key="done_bit"),sg.Button("סיום קנייה", key="done", bind_return_key=True), sg.Button("הסר פריט", key="remove"), sg.Button("אפס קניה", key="clear"), sg.Text("", key="total")]
@@ -100,7 +103,6 @@ def main():
             sg.Column([[sg.Frame("הוסף סוג", right_col, title_location="n")]],
                         element_justification="center", vertical_alignment="top")],
     ]
-
 
     #       Determine scaling factor
     root = sg.tk.Tk()
@@ -176,7 +178,7 @@ def main():
                 finish_cart(cart, 1 if event == "done_bit" else 0)
                 cart = []
             
-            case "cursor_reset":    # this is an event that's triggered when esc or such are 
+            case "reset_cursor":    # this is an event that's triggered when esc or such are 
                                     # pressed. just reset the cursor to the barcode input field
                                 
                 # it's recognized but it's delt with because it's an event 
