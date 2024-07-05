@@ -4,7 +4,7 @@
 
 **אל תשנה, אל תמחק, ואל תוסיף קבצים בתיקייה זו.**
 
-אם אתה נתקל בבעיות או אם אתה מאמין ששינוי הוא נדרש, אל תנסה לבצע את השינויים בעצמך. במקום זאת, אנא צור קשר עם האדם האחראי במספר הבא: 0539528270.
+אם אתה נתקל בבעיות או אם אתה מאמין ששינוי הוא נדרש, אל תנסה לבצע את השינויים בעצמך. במקום זאת, אנא צור קשר עם האדם האחראי במספר הבא: .
 
 אנו מעריכים את שיתוף הפעולה שלך. תודה.
 
@@ -14,6 +14,6 @@
 
 **DO NOT MODIFY, DELETE, OR ADD ANY FILES IN THIS DIRECTORY.**
 
-If you encounter any issues or if you believe that a change is necessary, DO NOT attempt to make the changes yourself. Instead, please contact the responsible person at the following number: 0539528270.
+If you encounter any issues or if you believe that a change is necessary, DO NOT attempt to make the changes yourself. Instead, please contact the responsible person at the following number: .
 
 Your cooperation is greatly appreciated. Thank you.
